@@ -6,6 +6,9 @@ Clone the repo in the `src` folder of the ros2 workspace.
 ```
 cd ros2_ws/src/
 git clone git@github.com:fbenti/SwarmManipulation.git --recursive
+cd SwarmManipulation/crazyswarm2/
+git checkout swarm_manipulation
+cd ../..
 git clone --branch ros2 --recursive https://github.com/IMRCLab/motion_capture_tracking.git
 ```
 
