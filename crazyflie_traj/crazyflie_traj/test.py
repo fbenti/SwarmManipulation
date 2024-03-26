@@ -11,9 +11,9 @@ def generate_spiral_trajectory(radius, pitch, height, speed, num_points):
     return x, y, z, time
 
 # Define parameters
-radius = 1  # Radius of the spiral
-pitch = 1    # Pitch of the spiral
-height = 5   # Starting height
+radius = 0.2  # Radius of the spiral
+pitch = np.deg2rad(15)    # Pitch of the spiral
+height = 0.5   # Starting height
 speed = 1    # Speed of the drone along the spiral
 num_points = 100  # Number of points to generate
 

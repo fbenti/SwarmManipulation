@@ -100,6 +100,7 @@ class SingleUAV(Node):
 
     def get_position(self):
         target_frame = self.cf.prefix[1:]
+        # self.get_logger().info(f"FRAME {target_frame}")
         try:
             transform = self.tf_buffer.lookup_transform(
                 'world', target_frame,  # source and target frame
@@ -121,10 +122,13 @@ class SingleUAV(Node):
         self.commanded_takeoff = True
         self.cf.setParam('kalman.resetEstimation', 1)
         self.parent.timeHelper.sleep(1.0)
-        self.cf.setParam('kalman.resetEstimation', 0)
-        self.parent.timeHelper.sleep(1.0)
-        self.cf.curr_waypoint = np.array([self.cf.curr_position[0], 
-                                          self.cf.curr_position[1], 
+        # self.cf.setParam('kalman.resetEstimation', 0)
+        # self.parent.timeHelper.sleep(1.0)
+        # self.cf.curr_waypoint = np.array([self.cf.curr_position[0], 
+        #                                   self.cf.curr_position[1], 
+        #                                   self.takeoff_height])
+        self.cf.curr_waypoint = np.array([self.cf.initialPosition[0], 
+                                          self.cf.initialPosition[1], 
                                           self.takeoff_height])
         self.cf.takeoff(targetHeight=self.takeoff_height, 
                         duration=self.takeoff_duration) 
@@ -134,7 +138,9 @@ class SingleUAV(Node):
     
 
     def has_tookoff(self):
-        dist = self.euclidian_dist(self.cf.curr_position, self.cf.curr_waypoint)
+        dist = self.euclidian_dist(self.cf.curr_position[2], self.cf.curr_waypoint[2])
+        self.get_logger().info(f"CURRENT POSITION : {self.cf.curr_position}")
+        self.get_logger().info(f"CURRENT WAYPOINT : {self.cf.curr_waypoint}")
         self.get_logger().info(f"err: {dist}")
         return  dist < self.distance_threshold
 
@@ -143,7 +149,11 @@ class SingleUAV(Node):
         """
         Check if drone has reached current waypoint.
         """
-        return self.euclidian_dist(self.cf.curr_waypoint, self.cf.curr_position) < self.distance_threshold
+        self.get_logger().info(f"CURRENT POSITION : {self.cf.curr_position}")
+        self.get_logger().info(f"CURRENT WAYPOINT : {self.cf.curr_waypoint}")
+        dist = self.euclidian_dist(self.cf.curr_waypoint, self.cf.curr_position)
+        self.get_logger().info(f"err: {dist}")
+        return  dist < self.distance_threshold
     
     def move_to_next_waypoint(self):
         """

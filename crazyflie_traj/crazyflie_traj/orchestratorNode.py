@@ -24,8 +24,8 @@ from crazyflie_traj.singleUAVNode import SingleUAV
 
 TAKEOFF_DURATION = 2.5
 HOVER_DURATION = 5.0
-TAKEOFF_HEIGHT = 2.0
-
+TAKEOFF_HEIGHT = 0.5
+ERROR_TRESHOLD = 0.5
 
 class OrchestratorNode(Node):
 
@@ -35,20 +35,21 @@ class OrchestratorNode(Node):
         self.swarm = Crazyswarm()
         self.timeHelper = self.swarm.timeHelper
         self.swarm.ids = list(self.swarm.allcfs.crazyfliesById.keys())
-
+        self.get_logger().info(f"{self.swarm.ids}")
         
         # Define trajectory (waypoints)
-        self.radius = 0.5  # Radius of the spiral
+        self.radius = 0.2  # Radius of the spiral
         self.pitch = np.deg2rad(15)    # Pitch of the spiral
         self.height = TAKEOFF_HEIGHT   # Starting height
         self.speed = 1    # Speed of the drone along the spiral
         self.num_waypoints = 100  # Number of points to generate
         self.idx_w = 0
         self.waypoints = self.generate_spiral_trajectory() 
+        self.get_logger().info(f"WAYPOINTS \n {self.waypoints}")
 
         # Control variables
         self.initMissionFlag = True # if True, the mission start automatically
-        self.distance_threshold = 0.2
+        self.distance_threshold = ERROR_TRESHOLD
 
         # Add position and waypoint to dict of single cfs
         self.UAVS = {}
@@ -73,9 +74,6 @@ class OrchestratorNode(Node):
         # State machine
         self.stateMachineInit()
         self.stateMachineStart()
-
-
-
 
     
     def initPubs(self):
@@ -108,7 +106,6 @@ class OrchestratorNode(Node):
 
     def stateMachineCallback(self) -> None:
         self.stateMachine.stateIterate()
-
         
     def get_position(self):
         target_frame = "cf231"
@@ -212,33 +209,16 @@ class OrchestratorNode(Node):
 
 
 
-
 def main():
     rclpy.init()
-    from rclpy.executors import MultiThreadedExecutor
-    executor = MultiThreadedExecutor()
     node = OrchestratorNode()
-    # executor.add_node(node)
-    # node.UAVS = {}
-    # for id in node.swarm.ids:
-    #     cf = node.swarm.allcfs.crazyfliesById[id]
-    #     cf.curr_position = None
-    #     cf.curr_waypoint = None
-    #     node.UAVS[id] = SingleUAV(cf,
-    #                                 node.distance_threshold,
-    #                                 TAKEOFF_HEIGHT,
-    #                                 TAKEOFF_DURATION,
-    #                                 node.waypoints)
-    #     executor.add_node(node.UAVS[id])
-    #     break
     try:
         rclpy.spin(node)
-        # executor.spin()
     except KeyboardInterrupt:
-        pass
-
-    rclpy.shutdown()
+        node.takeoff()
     
+    node.takeoff()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':

@@ -69,12 +69,12 @@ class GOING_TO_WAYPOINT(State):
     def __init__(self, parentObj: SingleUAV) -> None:
         super().__init__("GOING_TO_WAYPOINT", parentObj)
         self.parentObj: SingleUAV  # set type hinting for parentObj
+        self.parentObj.get_logger().info(f"{self.parentObj.cf.prefix[1:]} : GOING_TO_WAYPOINT")
 
     def iterate(self) -> None:
         self.parentObj.statePub.publish(String(data=self.name))
 
         if self.parentObj.has_reached_waypoint():
-
             # If waypoints left in the queue -> goTo
             if self.parentObj.any_waypoint_left():
                 self.parentObj.get_logger().info(f"{self.parentObj.cf.prefix[1:]} : Reached waypoint ... MOVING to next")
